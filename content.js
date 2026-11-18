@@ -49,53 +49,6 @@ const ICONS = {
   users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
 };
 const ic = (k, cls="i") => `<svg class="${cls}" viewBox="0 0 24 24">${ICONS[k]||""}</svg>`;
-
-/* ================= CONTENT ================= */
-// Each topic: its own scales [low end, high end]. GENERIC scales are mixed into every topic.
-const GENERIC = [
-  ["Overrated","Underrated"],["Forgettable","Iconic"],["Kid-friendly","Grown-ups only"],["Hated","Beloved"],
-  ["Boring","Exciting"],["Everyone knows it","Hardly anyone knows it"],["Old-school","Brand new"],["Wholesome","Chaotic"],
-  ["Cheap","Fancy"],["Chill","Intense"],["Totally normal","Super weird"],["Simple","Complicated"],
-  ["Embarrassing to love","Proud to love"],["Quiet","Loud"],["Grandma would hate it","Grandma would love it"],
-];
-const TOPICS = [
-  { name:"Movies", ic:"film", scales:[["Not funny","Hilarious"],["Terrible","Masterpiece"],["Not scary","Terrifying"],["Low budget","Huge budget"],["Zero tears","Ugly crying"],["Easy to follow","Mind-bending"],["Great date movie","Worst date movie"],["Never rewatch","Rewatch forever"],["Realistic","Totally unrealistic"],["Short & sweet","Way too long"]]},
-  { name:"TV Shows", ic:"tv", scales:[["Easy to quit","Can’t stop bingeing"],["Not funny","Hilarious"],["Awful ending","Perfect ending"],["Comfort show","Stress show"],["Background noise","Needs full attention"],["Fell off fast","Great the whole way"],["Not scary","Terrifying"],["Watch with parents","Never watch with parents"]]},
-  { name:"Foods", ic:"food", scales:[["Gross","Delicious"],["Healthy","Unhealthy"],["Mild","Spicy"],["Easy to make","Chef-level hard"],["Breakfast","Dinner"],["Clean to eat","Messy to eat"],["Smells bad","Smells amazing"],["Sweet","Savory"],["Kid food","Adult food"],["Eat it daily","Once a year"]]},
-  { name:"Animals", ic:"paw", scales:[["Harmless","Deadly"],["Ugly","Adorable"],["Tiny","Enormous"],["Slow","Fast"],["Terrible pet","Perfect pet"],["Dumb","Genius"],["Common","Rare"],["I’d win a fight","It would destroy me"],["Slimy","Fluffy"],["Silent","Noisy"]]},
-  { name:"Celebrities", ic:"star", scales:[["Barely famous","World-famous"],["Not funny","Hilarious"],["No talent","Insanely talented"],["Mean vibes","Nice vibes"],["Scandal-free","Constant drama"],["Awkward hangout","Best hangout ever"],["Young","Old"],["Would ignore my DM","Would reply to my DM"]]},
-  { name:"Fictional Characters", ic:"book", scales:[["Pure evil","Pure good"],["Useless","Extremely capable"],["Clueless","Genius"],["Annoying","Lovable"],["Dies first in a horror movie","Survives to the end"],["Terrible friend","Best friend"],["Weak","Powerful"],["Serious","Silly"],["Bad roommate","Dream roommate"]]},
-  { name:"Animated Characters", ic:"sparkle", scales:[["Annoying","Lovable"],["Useless","Hero material"],["Not funny","Hilarious"],["Bad singer","Amazing singer"],["Would die instantly in real life","Would thrive in real life"],["Sidekick energy","Main character energy"],["Scary","Huggable"],["Bad role model","Great role model"]]},
-  { name:"Villains", ic:"skull", scales:[["Not scary","Terrifying"],["Weak","All-powerful"],["Dumb plan","Genius plan"],["Unlikeable","Weirdly likeable"],["Pure evil","Kind of had a point"],["Bad outfit","Iconic outfit"],["Easy to defeat","Nearly unbeatable"]]},
-  { name:"Songs & Artists", ic:"music", scales:[["Can’t dance to it","Can’t stop dancing"],["Sad","Happy"],["Calm","Hype"],["Cringe","Cool"],["Bad lyrics","Amazing lyrics"],["Never on repeat","On repeat forever"],["Funeral song","Party song"],["Easy karaoke","Impossible karaoke"]]},
-  { name:"Video Games", ic:"gamepad", scales:[["Easy","Rage-quit hard"],["Ugly","Gorgeous"],["Casual","Sweaty"],["Short","Endless"],["Better solo","Better with friends"],["Relaxing","Chaotic"],["Kid-friendly","Way too violent"],["Waste of money","Worth every penny"]]},
-  { name:"Jobs", ic:"briefcase", scales:[["Low pay","Huge pay"],["Easy","Exhausting"],["Boring","Thrilling"],["Safe","Dangerous"],["Nobody wants it","Dream job"],["Indoors","Outdoors"],["Not respected","Highly respected"],["Introvert job","Extrovert job"],["Start tomorrow","Years of training"]]},
-  { name:"Holidays & Celebrations", ic:"gift", scales:[["Low effort","Huge production"],["Relaxing","Stressful"],["Bad food","Best food"],["Kids love it","Adults love it"],["Cold weather","Hot weather"],["Spend nothing","Spend a fortune"],["Family time","Friend time"]]},
-  { name:"Sports", ic:"trophy", scales:[["Easy to play","Insanely hard"],["Boring to watch","Thrilling to watch"],["Safe","Injury city"],["Cheap to play","Expensive to play"],["Pure luck","Pure skill"],["Solo","Team"],["Slow","Fast-paced"],["I’d try it","Absolutely not"]]},
-  { name:"Snacks & Candy", ic:"candy", scales:[["Gross","Delicious"],["Healthy-ish","Pure junk"],["Crunchy","Chewy"],["Sweet","Salty"],["Happy to share","Hoard it"],["Clean fingers","Messy fingers"],["Childhood favorite","Grown-up taste"],["Can stop at one","Eat the whole bag"]]},
-  { name:"Places to Visit", ic:"globe", scales:[["Meh","Bucket list"],["Cheap trip","Expensive trip"],["Freezing","Scorching"],["Relaxing","Adventurous"],["Close to home","Across the world"],["Safe","Sketchy"],["Empty","Packed with tourists"],["Bad food","Amazing food"]]},
-  { name:"Superpowers", ic:"bolt", scales:[["Useless","Overpowered"],["Lame","Coolest ever"],["Easy to control","Impossible to control"],["Would use for good","Would use for crimes"],["Subtle","Flashy"],["Fun at parties","Ruins parties"]]},
-  { name:"Fast Food", ic:"cup", scales:[["Gross","Delicious"],["Cheap","Pricey"],["Slow","Lightning fast"],["Healthy-ish","Pure grease"],["Lunch spot","3 a.m. spot"],["Bad service","Great service"],["Tiny menu","Giant menu"]]},
-  { name:"Apps & Websites", ic:"phone", scales:[["Useless","Can’t live without it"],["Wholesome","Toxic"],["Easy to use","Confusing"],["Rarely open","Open 100× a day"],["Boomer app","Gen Z app"],["Productive","Total time-waster"],["Would delete","Would never delete"]]},
-  { name:"Hobbies", ic:"palette", scales:[["Cheap","Expensive"],["Easy to start","Hard to start"],["Lazy","Exhausting"],["Indoors","Outdoors"],["Solo","Social"],["Calm","Adrenaline rush"],["Impressive to admit","Embarrassing to admit"]]},
-  { name:"Halloween Costumes", ic:"ghost", scales:[["Zero effort","Insane effort"],["Cute","Scary"],["Clever","Obvious"],["Comfy","Miserable to wear"],["Kid costume","Adult party costume"],["Solo costume","Group costume"]]},
-  { name:"Drinks", ic:"glass", scales:[["Gross","Delicious"],["Healthy","Unhealthy"],["Ice cold","Piping hot"],["Sweet","Bitter"],["Morning drink","Night drink"],["Kid drink","Grown-up drink"],["Sip slowly","Chug it"]]},
-  { name:"Household Objects", ic:"home", scales:[["Useless","Essential"],["Tiny","Huge"],["Safe","Dangerous"],["Never touch it","Use it daily"],["Ugly","Beautiful"],["Easy to lose","Impossible to lose"],["Would save in a fire","Let it burn"]]},
-  { name:"Excuses for Being Late", ic:"clock", scales:[["Totally believable","Obvious lie"],["Boring","Dramatic"],["My fault","Not my fault"],["Lame","Legendary"],["Use it once","Use it every week"],["Boss accepts it","Boss fires you"]]},
-  { name:"Historical Figures", ic:"columns", scales:[["Villain","Hero"],["Barely known","Super famous"],["Boring","Fascinating"],["Terrible roommate","Great roommate"],["Ancient","Recent"],["Weak","Powerful"],["Would hate today’s world","Would love today’s world"]]},
-  { name:"Brands", ic:"tag", scales:[["Budget","Luxury"],["Untrustworthy","Trustworthy"],["Uncool","Cool"],["Kid brand","Adult brand"],["Boring ads","Iconic ads"],["Could disappear tomorrow","Will exist forever"]]},
-  { name:"Ways to Spend a Saturday", ic:"coffee", scales:[["Lazy","Productive"],["Free","Expensive"],["Alone","With a crowd"],["Boring","Epic"],["Indoors","Outdoors"],["Wholesome","Unhinged"],["Recharging","Exhausting"]]},
-  { name:"Fears & Phobias", ic:"alert", scales:[["Silly","Totally valid"],["Rare","Super common"],["Mild","Paralyzing"],["Easy to avoid","Impossible to avoid"],["Kids have it","Adults have it"]]},
-  { name:"Inventions", ic:"bulb", scales:[["Useless","World-changing"],["Ancient","Modern"],["Simple","Complicated"],["Safe","Dangerous"],["Could live without","Can’t live without"],["Boring","Genius"]]},
-  { name:"Pizza Toppings", ic:"pizza", scales:[["Disgusting","Delicious"],["Normal","Controversial"],["Mild","Spicy"],["Kids love it","Adults only"],["Healthy-ish","Unhealthy"],["Goes with anything","Ruins everything"]]},
-  { name:"School Subjects", ic:"cap", scales:[["Easy","Hardest ever"],["Useless","Super useful"],["Boring","Fun"],["Little homework","Tons of homework"],["Chill teachers","Strict teachers"],["Forgot everything","Still remember it"]]},
-  { name:"Cars & Vehicles", ic:"car", scales:[["Slow","Fast"],["Ugly","Gorgeous"],["Cheap","Expensive"],["Tiny","Huge"],["Reliable","Always broken"],["Grandma car","Show-off car"],["Comfy","Bumpy"]]},
-  { name:"Dating Red Flags", ic:"flag", scales:[["Basically a green flag","Run immediately"],["Minor","Dealbreaker"],["Rare","Super common"],["Funny","Scary"],["Easy to spot","Hidden until it’s too late"]]},
-  { name:"Things at a Party", ic:"balloon", scales:[["Party killer","Life of the party"],["Expected","Surprising"],["Cheap","Expensive"],["Wholesome","Chaotic"],["Gone in 5 minutes","Lasts all night"]]},
-  { name:"Weather & Nature", ic:"cloud", scales:[["Calm","Destructive"],["Ugly","Beautiful"],["Common","Rare"],["Cozy","Miserable"],["Freezing","Scorching"],["Quiet","Deafening"]]},
-  { name:"Board & Card Games", ic:"dice", scales:[["Simple","Rulebook nightmare"],["Pure luck","Pure skill"],["Friendly","Friendship-ending"],["Quick","Takes all night"],["For kids","For adults"],["Boring","Hype"]]},
-  { name:"Smells", ic:"wind", scales:[["Disgusting","Heavenly"],["Faint","Overpowering"],["Rare","Every day"],["Nostalgic","Brand new"],["Natural","Artificial"]]},
-];
 Object.assign(ICONS, {
   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/>',

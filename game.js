@@ -153,7 +153,7 @@ let revealStep = 0, revealT = null; // Plot It: answers appear one by one on the
 function newCode(){ let c=""; for (let i=0;i<4;i++) c += CODE_CHARS[rnd(CODE_CHARS.length)]; return c; }
 function freshHost(){
   return { code:newCode(), phase:"lobby", hostPid:null, players:[], custom:[],
-    settings:{ game:"classic", rounds:2, vote:"claim", limit:0, read:10, pick:false, plotLimit:60, customOnly:false },
+    settings:{ game:"classic", rounds:2, vote:"claim", limit:0, read:10, pick:false, plotLimit:60, packs:PACKS.map(p=>p.id) },
     order:[], turn:0, total:0, cat:null, target:null, clue:"", votes:{}, bets:{}, gains:null, bonus:0, closest:[], betWinners:[],
     readUntil:null, deadline:null, answers:{}, aorder:[], pv:{}, hot:{}, tally:null, history:[], awards:null };
 }
@@ -166,17 +166,23 @@ const isOnline = pid => conns.has(pid) && conns.get(pid).open;
 const freeColor = () => DEFAULT_ORDER.concat(COLORS).find(c => !H.players.some(p=>p.color===c)) || COLORS[rnd(COLORS.length)];
 const freeAv = () => shuffle(AV_KEYS).find(a => !H.players.some(p=>p.av===a)) || AV_KEYS[rnd(AV_KEYS.length)];
 
+// Topics in the packs the host switched on. Custom topics use every scale on both axes.
 function allTopics(){
-  const custom = H.custom.map(c => ({ name:c.name, ic:"pencil", scales:c.scales, custom:true }));
-  if (H.settings.customOnly && custom.length) return custom;
-  return TOPICS.concat(custom);
+  const custom = H.custom.map(c => ({ name:c.name, ic:"pencil", pack:"custom", x:c.scales, y:c.scales }));
+  const packs = H.settings.packs || PACKS.map(p => p.id);
+  const list = TOPICS.concat(custom).filter(t => packs.includes(t.pack));
+  return list.length ? list : TOPICS.concat(custom);
 }
-const pool = t => { const T = allTopics()[t]; return T.custom ? T.scales : T.scales.concat(GENERIC); };
-function newScale(t, avoid){ const bad = new Set(avoid.filter(Boolean).map(key)); const ok = pool(t).filter(s => !bad.has(key(s))); return ok.length ? ok[rnd(ok.length)] : pool(t)[0]; }
+// pick a scale for one axis ("x" bottom, "y" side), avoiding the ones in `avoid`
+function newScale(t, axis, avoid){
+  const T = allTopics()[t], bad = new Set(avoid.filter(Boolean).map(key));
+  const ok = T[axis].filter(s => !bad.has(key(s)));
+  return ok.length ? ok[rnd(ok.length)] : T[axis][0];
+}
 function newCategory(t){
   const n = allTopics().length;
   if (t === undefined){ let k; do { k = rnd(n); } while (n > 1 && H.cat && k === H.cat.t); t = k; }
-  const x = newScale(t, []); H.cat = { t, x, y: newScale(t, [x]) };
+  const x = newScale(t, "x", []); H.cat = { t, x, y: newScale(t, "y", [x]) };
 }
 const catView = () => H.cat ? { name: allTopics()[H.cat.t].name, ic: allTopics()[H.cat.t].ic, x:H.cat.x, y:H.cat.y } : null;
 function randomTarget(){ let t; do { t = [rnd(10)+1, rnd(10)+1]; } while (H.target && t[0]===H.target[0] && t[1]===H.target[1]); H.target = t; }
@@ -242,6 +248,7 @@ function startGame(){
   startTurn();
 }
 function startTurn(){
+  H.lastGains = H.gains || null;   // shown next to the standings while the next turn gets going
   newCategory(); H.target = null; randomTarget();
   Object.assign(H, { clue:"", votes:{}, bets:{}, gains:null, bonus:0, closest:[], betWinners:[], readUntil:null, deadline:null,
     answers:{}, aorder:[], pv:{}, hot:{}, tally:null, phase:"pick" });
@@ -360,9 +367,9 @@ function onHostMsg(c, m){
     case "act": {
       if (!isLeader || H.phase !== "pick") return;
       const a = m.a;
-      if (a === "rx") H.cat.x = newScale(H.cat.t,[H.cat.x,H.cat.y]);
-      else if (a === "ry") H.cat.y = newScale(H.cat.t,[H.cat.y,H.cat.x]);
-      else if (a === "rb"){ const ox=H.cat.x, oy=H.cat.y; H.cat.x = newScale(H.cat.t,[ox,oy]); H.cat.y = newScale(H.cat.t,[ox,oy,H.cat.x]); }
+      if (a === "rx") H.cat.x = newScale(H.cat.t,"x",[H.cat.x,H.cat.y]);
+      else if (a === "ry") H.cat.y = newScale(H.cat.t,"y",[H.cat.y,H.cat.x]);
+      else if (a === "rb"){ const ox=H.cat.x, oy=H.cat.y; H.cat.x = newScale(H.cat.t,"x",[ox,oy]); H.cat.y = newScale(H.cat.t,"y",[ox,oy,H.cat.x]); }
       else if (a === "rt") newCategory();
       else if (a === "topic" && allTopics()[m.v]) newCategory(+m.v);
       else if (a === "square") randomTarget();
@@ -445,7 +452,11 @@ function hostAction(a, m){
   if (a === "start" && H.phase === "lobby" && H.players.length >= 3) return startGame();
   if (a === "set" && H.phase === "lobby"){ applySetting(m.k, m.v); return hostBroadcast(); }
   if (a === "custom-add" && H.phase === "lobby"){ addCustom(m.topic); return hostBroadcast(); }
-  if (a === "custom-del" && H.phase === "lobby"){ H.custom.splice(+m.i, 1); if (!H.custom.length) H.settings.customOnly = false; return hostBroadcast(); }
+  if (a === "custom-del" && H.phase === "lobby"){
+    H.custom.splice(+m.i, 1);
+    if (!H.custom.length && H.settings.packs){ H.settings.packs = H.settings.packs.filter(p => p !== "custom"); if (!H.settings.packs.length) H.settings.packs = PACKS.map(p=>p.id); }
+    return hostBroadcast();
+  }
   if (a === "kick" && H.phase === "lobby") return kickPlayer(m.pid);
   if (a === "drop"){ if (H.phase === "guess") return doReveal(); if (H.phase === "plot") return startPlotVote(); if (H.phase === "pvote") return finishPlotVote(); }
   if (a === "skip" && !["lobby","end"].includes(H.phase)) return skipTurn();
@@ -463,7 +474,13 @@ function applySetting(k, v){
   if (k === "read" && [0,5,10,15].includes(+v)) S.read = +v;
   if (k === "plotLimit" && [45,60,90,120].includes(+v)) S.plotLimit = +v;
   if (k === "pick") S.pick = !!v;
-  if (k === "customOnly") S.customOnly = !!v && H.custom.length > 0;
+  if (k === "pack"){
+    const all = PACKS.map(p=>p.id).concat(H.custom.length ? ["custom"] : []);
+    const cur = new Set(S.packs || all);
+    if (cur.has(v)) cur.delete(v); else if (all.includes(v)) cur.add(v);
+    if (cur.size) S.packs = all.filter(id => cur.has(id));   // always keep at least one pack on
+  }
+  if (k === "packs-all") S.packs = PACKS.map(p=>p.id).concat(H.custom.length ? ["custom"] : []);
 }
 function addCustom(t){
   if (!t) return;
@@ -471,6 +488,8 @@ function addCustom(t){
   const scales = (t.scales || []).map(s => [String(s[0]||"").trim().slice(0,32), String(s[1]||"").trim().slice(0,32)]).filter(s => s[0] && s[1]);
   if (!name || scales.length < 2) return;
   H.custom.push({ name, scales });
+  const S = H.settings; S.packs = S.packs || PACKS.map(p=>p.id);
+  if (!S.packs.includes("custom")) S.packs.push("custom");   // new custom topics are switched on
 }
 function kickPlayer(pid){
   if (pid === H.hostPid) return;
@@ -491,7 +510,7 @@ function viewFor(pid){
     leader:lead, next:nextLeaderPid(), cat:catView(), clue:["guess","reveal"].includes(ph) ? H.clue : "",
     readLeft: ph==="read" && H.readUntil ? Math.max(0, H.readUntil - now()) : null,
     left: H.deadline ? Math.max(0, H.deadline - now()) : null,
-    gains:H.gains, bonus:H.bonus, custom:H.phase==="lobby" ? H.custom : null };
+    gains:H.gains, lastGains:H.lastGains || null, bonus:H.bonus, custom:H.phase==="lobby" ? H.custom : null };
   if (S.game === "classic"){
     v.target = ph === "reveal" || (isLeader && ["pick","read","guess"].includes(ph)) ? H.target : null;
     const showAll = ph === "reveal" || (S.vote !== "secret" && ph === "guess");
@@ -575,7 +594,13 @@ function settingsHTML(){
   const S = H.settings, sel = (k, opts) => `<select data-set="${k}">${opts.map(([v,l])=>`<option value="${v}" ${String(S[k])===String(v)?"selected":""}>${l}</option>`).join("")}</select>`;
   const seg = (k, opts) => `<div class="seg">${opts.map(([v,l])=>`<button data-set="${k}" data-v="${v}" class="${S[k]===v?"on":""}">${l}</button>`).join("")}</div>`;
   const plot = S.game === "plot";
+  const packs = PACKS.concat(H.custom.length ? [{ id:"custom", name:"Custom" }] : []), on = S.packs || packs.map(p=>p.id);
+  const count = id => id === "custom" ? H.custom.length : TOPICS.filter(t => t.pack === id).length;
+  const total = packs.filter(p => on.includes(p.id)).reduce((a,p) => a + count(p.id), 0);
   return `
+    <div class="toggle" style="display:block"><div><b>Topic packs</b><small>${total} topics switched on. Tap a pack to turn it on or off.</small></div>
+      <div class="packs">${packs.map(p=>`<button data-set="pack" data-v="${p.id}" class="${on.includes(p.id)?"on":""}">${esc(p.name)} <span>${count(p.id)}</span></button>`).join("")}
+        ${on.length < packs.length ? `<button data-set="packs-all" data-v="1" class="all">All packs</button>` : ""}</div></div>
     <div class="toggle"><div><b>Game type</b><small>${plot ? "Plot It: everyone names something for the category and places it, then votes for the best placement." : "Classic: one clue giver, everyone else finds the secret square."}</small></div>${seg("game", [["classic","Classic"],["plot","Plot It"]])}</div>
     <div class="toggle"><div><b>Turns per player</b><small>${plot ? "Each player picks the category this many times." : "Each player gives a clue this many times."}</small></div>${sel("rounds", [[1,"1"],[2,"2"],[3,"3"]])}</div>
     ${plot ? "" : `<div class="toggle"><div><b>Voting style</b><small>${VOTE_INFO[S.vote][1]}</small></div>${seg("vote", Object.entries(VOTE_INFO).map(([k,v])=>[k,v[0]]))}</div>`}
@@ -596,7 +621,7 @@ function customHTML(){
         <button class="btn" id="ct-add">${ic("plus")} Add topic</button>
       </div>
     </details>
-    ${H.custom.length ? `<div class="toggle"><div><b>Only use custom topics</b><small>Skip the built-in topics this game.</small></div><label class="sw"><input type="checkbox" data-set="customOnly" ${H.settings.customOnly?"checked":""}><span></span></label></div>` : ""}`;
+    ${H.custom.length ? `<p class="muted small customnote" style="margin:8px 0 0">Your topics are in the <b>Custom</b> pack. To play only these, turn the other packs off in Settings.</p>` : ""}`;
 }
 const customListHTML = () => H.custom.map((c,i)=>`<div class="pl"><span class="ico-sm">${ic("pencil")}</span><div style="min-width:0"><div>${esc(c.name)}</div><small class="muted">${c.scales.map(s=>`${esc(s[0])} → ${esc(s[1])}`).join(" · ")}</small></div>
   <button class="kick" data-cdel="${i}" aria-label="Remove topic">${ic("x")}</button></div>`).join("");
@@ -662,14 +687,17 @@ function renderLobbyScreen(){
       || `<div class="empty">Waiting for players to join…</div>`);
   patch("#lsettings", settingsHTML());
   patch("#customlist", customListHTML());
-  const lc = $("#lcustom"); if (lc && (!!H.custom.length) !== !!lc.querySelector("[data-set=customOnly]")) lc.innerHTML = customHTML();
+  const lc = $("#lcustom"); if (lc && (!!H.custom.length) !== !!lc.querySelector(".customnote")) lc.innerHTML = customHTML();
   const st = $("#start"); st.disabled = !can;
   st.innerHTML = can ? `Start ${GAME_LABEL[H.settings.game]} with ${H.players.length} players ${ic("arrowr")}` : "Need at least 3 players";
 }
 
-function standingsHTML(players, gains, leader, you){
+const ordinal = n => n + (n%100>=11&&n%100<=13 ? "th" : ["th","st","nd","rd"][n%10] || "th");
+// players tied on points share a place
+function rankOf(players, pid){ const me = players.find(p=>p.pid===pid); return me ? players.filter(p => p.score > me.score).length + 1 : 0; }
+function standingsHTML(players, gains, leader, you, label="Standings"){
   const order = players.slice().sort((a,b)=>b.score-a.score);
-  return `<div class="label">Standings</div>` + order.map((p,k)=>`<div class="sr ${p.online===false?"off":""}"><div class="rk">${k+1}</div>${chipFor(p,"sm")}
+  return `<div class="label">${label}</div>` + order.map((p,k)=>`<div class="sr ${p.online===false?"off":""} ${p.pid===you?"is-me":""}"><div class="rk">${rankOf(players,p.pid)}</div>${chipFor(p,"sm")}
     <div class="nm">${esc(p.name)}${p.pid===you?"<small>you</small>":""}${p.pid===leader?`<small>${H && H.settings.game==="plot"?"picker":"clue giver"}</small>`:""}${p.online===false?"<small>offline</small>":""}</div>
     <div class="gain">${gains && gains[p.pid] ? "+"+gains[p.pid] : ""}</div><div class="sc">${p.score}</div></div>`).join("");
 }
@@ -756,7 +784,7 @@ function renderGameScreen(){
     <div class="side">
       <div class="card joinchip"><div><small>Join · ${esc(shortUrl())}</small><div class="c">${H.code}</div></div>${statusDot()}</div>
       <div class="row prog">Turn ${Math.min(H.turn+1,H.total)} of ${H.total}<div class="bar"><i style="width:${pct}%"></i></div></div>
-      ${side}<div class="card">${standingsHTML(hostPlayersView(), ["reveal","presult"].includes(ph) ? H.gains : null, lead)}</div>
+      ${side}<div class="card">${standingsHTML(hostPlayersView(), ["reveal","presult"].includes(ph) ? H.gains : H.lastGains, lead, null, ["reveal","presult"].includes(ph) || !H.lastGains ? "Standings" : "Standings · last round")}</div>
       <button class="btn sm" id="tolobby">${ic("x")} End game</button>
     </div>
   </section>`;
@@ -896,10 +924,18 @@ function renderPhone(){
     $("#app").innerHTML = `<section class="phone"><div id="ph-head"></div><div id="ph-host"></div><div id="ph-body" class="stack"></div></section>`;
     shellFor(role, plot);
   }
+  const playing = !["lobby"].includes(V.phase), rank = rankOf(V.players, V.you);
   patch("#ph-head", `<div class="phead"><div class="me">${chipFor(me)}<span>${esc(me.name)}</span></div>
-    ${phoneConnected ? `<div class="pscore">${me.score} pts</div>` : `<div class="conn">${ic("wifi")} Reconnecting…</div>`}</div>`);
+    ${!phoneConnected ? `<div class="conn">${ic("wifi")} Reconnecting…</div>`
+      : playing ? `<div class="pscore"><span class="place">${ordinal(rank)} of ${V.players.length}</span> ${me.score} pts</div>` : ""}</div>`);
   updateHostCard();
   updatePhone(me, isLeader, plot);
+  // standings stay at the bottom of every in-game screen (results screens have their own, with this round's points)
+  const body = $("#ph-body");
+  if (body && playing && !$("#stand")){
+    if (!$("#stand-w")) body.insertAdjacentHTML("beforeend", `<div class="card" id="stand-w"></div>`);
+    patch("#stand-w", standingsHTML(V.players, V.lastGains, V.leader, V.you, V.lastGains ? "Standings · last round" : "Standings"));
+  }
   dropAnim = false;
 }
 const pmap = () => Object.fromEntries(V.players.map(p => [p.pid, p]));
@@ -923,7 +959,7 @@ function updateHostCard(){
       <span class="status ${V.online?"on":""}"><i></i>${V.online?"Room open":"Connecting…"}</span></div>${qr?`<div class="qr sm">${qr}</div>`:""}</div>`);
     patch("#hc-settings", settingsHTML());
     patch("#customlist", customListHTML());
-    const hc = $("#hc-custom"); if (hc && (!!H.custom.length) !== !!hc.querySelector("[data-set=customOnly]")) hc.innerHTML = customHTML();
+    const hc = $("#hc-custom"); if (hc && (!!H.custom.length) !== !!hc.querySelector(".customnote")) hc.innerHTML = customHTML();
     const can = V.players.length >= 3, st = $("#hc-start");
     st.disabled = !can; st.innerHTML = can ? `Start ${GAME_LABEL[V.settings.game]} with ${V.players.length} players ${ic("arrowr")}` : `Need at least 3 players (${V.players.length} joined)`;
     return;

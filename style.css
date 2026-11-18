@@ -294,6 +294,18 @@ svg.av{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:1.8
 .ico-sm svg.i{width:16px;height:16px}
 .pl small{display:block;font-weight:500;font-size:.8rem;overflow:hidden;text-overflow:ellipsis}
 #customlist{margin-bottom:6px}
+/* topic packs */
+.packs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.packs button{padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:600;font-size:.88rem;color:var(--muted);background:#fff;min-height:38px}
+.packs button span{font-weight:500;color:var(--faint);margin-left:2px}
+.packs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.packs button.on span{color:rgba(255,255,255,.6)}
+.packs button.all{border-style:dashed}
+/* standings: your place */
+.pscore{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.pscore .place{font-family:var(--body);font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--ink);color:#fff;padding:4px 8px;border-radius:999px}
+.sr.is-me{background:#f7f7f5;border-radius:8px;padding-left:6px;padding-right:6px}
+.sr.is-me .nm{font-weight:800}
 .phone .toggle{flex-wrap:wrap}
 .phone .toggle > div:first-child{flex:1 1 200px}
 /* host-and-play card */

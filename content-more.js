@@ -1,5 +1,5 @@
-// More content for Categriddies Online: extra topic icons, 25 new topics, and player characters.
-// Add your own topics by copying a line in TOPICS.push(...) below.
+// More content for Categriddies Online: extra icons and the player characters.
+// The topics themselves live in topics.js.
 
 Object.assign(ICONS, {
   cake:'<path d="M4 21h16v-8H4zM4 16.5c2 1.3 4 1.3 6 0s4-1.3 6 0 4 1.3 4 0M12 13v-3M12 7.5a1.5 1.5 0 0 0 1.5-1.5C13.5 4.5 12 3 12 3s-1.5 1.5-1.5 3A1.5 1.5 0 0 0 12 7.5z"/>',
@@ -20,34 +20,6 @@ Object.assign(ICONS, {
   menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
 });
-
-TOPICS.push(
-  { name:"Desserts", ic:"cake", scales:[["Store-bought","Fancy restaurant"],["Light","Instant food coma"],["Easy to bake","Pastry chef only"],["Grandma’s recipe","Trendy new thing"],["Happy to share","Mine. All mine."],["Gross","Heavenly"]]},
-  { name:"Breakfast Cereals", ic:"bowl", scales:[["Health food","Basically candy"],["Soggy in seconds","Crunchy forever"],["Kids’ cereal","Adult cereal"],["Plain","Wild flavors"],["Eat it dry","Needs milk"],["Gross","Delicious"]]},
-  { name:"Ice Cream Flavors", ic:"icecream", scales:[["Classic","Experimental"],["Gross","Delicious"],["Kid favorite","Grown-up taste"],["Light","Rich"],["Boring","Exciting"],["Cone","Cup"]]},
-  { name:"Sandwiches", ic:"food", scales:[["Tiny snack","Giant meal"],["Neat","Falls apart"],["Gas station","Fancy deli"],["Cold","Hot"],["Gross","Delicious"],["Easy to make","Real effort"]]},
-  { name:"Restaurant Chains", ic:"cup", scales:[["Cheap","Pricey"],["Fast","Sit-down"],["Gross","Delicious"],["Date night","Hangover cure"],["Hard to find","Everywhere"],["Bad service","Great service"]]},
-  { name:"Reality TV", ic:"camera", scales:[["Trashy","Classy"],["Clearly scripted","Totally real"],["Boring","Addictive"],["Wholesome","Messy"],["Forgettable","Iconic"],["Would never go on it","Would sign up tomorrow"]]},
-  { name:"Cartoon Shows", ic:"tv", scales:[["For kids","For adults"],["Not funny","Hilarious"],["Ugly","Gorgeous"],["Forgettable","Iconic"],["Chill","Chaotic"],["Aged badly","Still holds up"]]},
-  { name:"Theme Park Rides", ic:"ferris", scales:[["Kiddie ride","Terrifying"],["No line","Hours-long line"],["Boring","Thrilling"],["Bone dry","Soaked"],["Ride it again","Never again"],["Smooth","Neck-breaking"]]},
-  { name:"Childhood Toys", ic:"blocks", scales:[["Cheap","Expensive"],["Boring","Endless fun"],["Safe","Dangerous"],["Forgotten","Still love it"],["Quiet","Noisy"],["Solo","Better with friends"]]},
-  { name:"Music Genres", ic:"music", scales:[["Chill","Hype"],["Mainstream","Niche"],["Old-school","Modern"],["Sad","Happy"],["Easy to play","Hard to play"],["Quiet","Loud"]]},
-  { name:"Famous Duos", ic:"users", scales:[["Rivals","Best friends"],["Forgettable","Iconic"],["One carries the team","Equal partners"],["Wholesome","Chaotic"],["Will break up soon","Together forever"]]},
-  { name:"Ways to Die in a Horror Movie", ic:"skull", scales:[["Totally avoidable","Couldn’t be helped"],["Boring","Spectacular"],["Quick","Drawn out"],["Not scary","Nightmare fuel"],["Dumb","Clever"],["Seen it a hundred times","Never seen before"]]},
-  { name:"Pet Peeves", ic:"alert", scales:[["Mildly annoying","Rage-inducing"],["Rare","Every day"],["Petty","Totally justified"],["Easy to ignore","Impossible to ignore"],["I do it too","I’d never do it"]]},
-  { name:"Texting Habits", ic:"chat", scales:[["Normal","Unhinged"],["Polite","Rude"],["Boomer","Gen Z"],["Endearing","Annoying"],["Rare","Everyone does it"],["Low effort","Way too much effort"]]},
-  { name:"Life Skills", ic:"bulb", scales:[["Easy","Hard"],["Useless","Essential"],["Learned as a kid","Still learning"],["Boring","Impressive"],["Rarely needed","Every day"]]},
-  { name:"College Majors", ic:"cap", scales:[["Easy","Brutal"],["Low pay","High pay"],["Boring","Fascinating"],["Party major","Library major"],["Useless","Super useful"],["Common","Rare"]]},
-  { name:"Fashion Trends", ic:"shirt", scales:[["Timeless","Gone in a month"],["Cringe","Cool"],["Comfy","Painful"],["Cheap","Expensive"],["Subtle","Loud"],["Kid trend","Adult trend"]]},
-  { name:"Kitchen Gadgets", ic:"home", scales:[["Useless","Essential"],["Cheap","Pricey"],["Easy to use","Needs a manual"],["Safe","Dangerous"],["Never used","Used daily"],["Tiny","Takes up the counter"]]},
-  { name:"Road Trip Essentials", ic:"car", scales:[["Optional","Can’t leave without it"],["Cheap","Expensive"],["Boring","Fun"],["Healthy","Pure junk"],["Fits in a pocket","Fills the trunk"]]},
-  { name:"Bad Gifts", ic:"gift", scales:[["Mildly bad","Relationship-ending"],["Cheap","Weirdly expensive"],["Thoughtless","Weirdly specific"],["Return it","Secretly keep it"],["Funny","Insulting"]]},
-  { name:"First Date Ideas", ic:"heart", scales:[["Disaster","Married within a year"],["Free","Expensive"],["Chill","Adventurous"],["Awkward","Effortless"],["Boring","Memorable"],["Indoors","Outdoors"]]},
-  { name:"Wedding Moments", ic:"rings", scales:[["Sweet","Chaotic"],["Forgettable","Talked about for years"],["Planned","Total accident"],["Happy tears","Cringe tears"],["Expected","Shocking"]]},
-  { name:"Mythical Creatures", ic:"flame", scales:[["Harmless","Deadly"],["Ugly","Majestic"],["Tiny","Gigantic"],["Terrible pet","Perfect pet"],["Dumb","Wise"],["Friendly","Hostile"]]},
-  { name:"Sci-Fi Tech", ic:"rocket", scales:[["Realistic","Pure fantasy"],["Useless","Life-changing"],["Safe","Dangerous"],["Cheap","Priceless"],["Coming soon","Never happening"],["Cool","Creepy"]]},
-  { name:"Internet Trends", ic:"phone", scales:[["Cringe","Iconic"],["Gone in a week","Lasted years"],["Harmless","Dangerous"],["Niche","Everyone did it"],["Wholesome","Chaotic"],["Anyone can do it","Takes real skill"]]},
-);
 
 // Player characters: original line drawings, shown on your squares and in the standings.
 const AVATARS = {
